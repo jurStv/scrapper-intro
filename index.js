@@ -38,10 +38,15 @@ async function main() {
   const scLinks = ['https://soundcloud.com/bliss_inc/radiant-reality'];
   const fileNames = scLinks.map((link) => `${last(link.split('/'))}.mp3` );
   const downloadLinks = await Promise.all(scLinks.map(getDownloadLinkFromSc));
-  const downloads = await Promise.all(downloadLinks.map((link, index) => {
+  /* Parallele download */
+  // const downloads = await Promise.all(downloadLinks.map((link, index) => {
+  //   const filename = fileNames[index];
+  //   return getFile(filename, link);
+  // }));
+  const downloads = await downloadLinks.reduce((acc, link, index) => {
     const filename = fileNames[index];
-    return getFile(filename, link);
-  }));
+    return acc.then(() => getFile(filename, link));
+  }, Promise.resolve(true));
 
   nightmare
     .end()
